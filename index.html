@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Kolektor wydechowy top-mount 3S-GE BEAMS pod Garrett G25-550: model 3D, linie spawów i animacja przepływu z symulacji 1D.">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Kolektor 3S-GE G25</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#eef0f2; --panel:#f8f9fa; --ink:#1b1f24; --muted:#5d6670; --line:#d3d8de;
+  --view:#dfe3e7; --accent:#b8661f; --accent-ink:#8a4a12; --chip:#e6e9ec;
+  --sans:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --cond:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#121417; --panel:#181b1f; --ink:#e7eaee; --muted:#9aa3ad; --line:#2a2f35;
+    --view:#0d0f12; --accent:#e08a3c; --accent-ink:#f0a660; --chip:#23272c; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#121417; --panel:#181b1f; --ink:#e7eaee; --muted:#9aa3ad; --line:#2a2f35;
+  --view:#0d0f12; --accent:#e08a3c; --accent-ink:#f0a660; --chip:#23272c; color-scheme:dark; }
+html,body{height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.5}
+.app{display:grid; grid-template-columns:minmax(0,1fr) 380px; gap:16px; height:100%; padding:16px; box-sizing:border-box}
+.viewer{position:relative; background:var(--view); border:1px solid var(--line); border-radius:6px; overflow:hidden; min-height:420px}
+#c{display:block; width:100%; height:100%; touch-action:none}
+.toolbar{position:absolute; left:12px; top:12px; right:12px; display:flex; flex-wrap:wrap; gap:6px; pointer-events:none}
+.toolbar>*{pointer-events:auto}
+.btn{font:500 13px/1 var(--sans); letter-spacing:.02em; padding:8px 11px; border-radius:4px; border:1px solid var(--line);
+  background:var(--panel); color:var(--ink); cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.btn[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#fff}
+.sep{width:1px; background:var(--line); margin:0 4px}
+.legend{position:absolute; left:12px; bottom:12px; display:flex; flex-wrap:wrap; gap:12px; font:500 12px var(--sans); color:var(--muted);
+  background:color-mix(in srgb,var(--panel) 85%,transparent); padding:6px 10px; border-radius:4px; border:1px solid var(--line)}
+.sw{display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:-1px}
+.flowbar{position:absolute; right:12px; bottom:44px; display:flex; flex-direction:column; gap:6px; width:270px; max-width:calc(100% - 24px);
+  background:color-mix(in srgb,var(--panel) 92%,transparent); border:1px solid var(--line); border-radius:6px; padding:10px; font-size:12px}
+.flowbar[hidden]{display:none!important}
+.flowbar .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.flowbar label{color:var(--muted)}
+.flowbar select,.flowbar input{font:12px var(--sans)}
+#hud{width:100%; height:100px; display:block}
+.flowbar .fhead{display:flex; justify-content:space-between; align-items:center; gap:8px}
+.flowbar .fhead .btn{padding:4px 8px; font-size:12px}
+.flowbar.min{width:auto}
+.flowbar.min .fbody{display:none}
+.crank{font:500 13px var(--mono); font-variant-numeric:tabular-nums}
+.status{position:absolute; right:12px; bottom:12px; font:12px var(--mono); color:var(--muted)}
+aside{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:18px 18px 22px; overflow:auto; display:flex; flex-direction:column; gap:18px}
+h1{font:700 26px/1.1 var(--cond); letter-spacing:.01em; margin:0; text-wrap:balance}
+.sub{color:var(--muted); font-size:13px; margin-top:4px}
+h2{font:600 13px/1 var(--cond); text-transform:uppercase; letter-spacing:.09em; color:var(--muted); margin:0 0 8px}
+.kv{display:grid; grid-template-columns:1fr auto; gap:6px 12px; font-size:14px}
+.kv dt{color:var(--muted)} .kv dd{margin:0; font-family:var(--mono); font-variant-numeric:tabular-nums; text-align:right}
+.kv dd b{color:var(--accent-ink); font-weight:500}
+table{width:100%; border-collapse:collapse; font-size:13px}
+th,td{padding:6px 4px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+th{font:600 11px var(--cond); text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
+td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+.tag{display:inline-block; font:600 11px var(--cond); letter-spacing:.06em; padding:2px 6px; border-radius:3px; background:var(--chip)}
+.note{font-size:13px; color:var(--muted)}
+.note li{margin-bottom:4px}
+.warn{color:var(--accent-ink)}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr; height:auto}
+  .viewer{height:62vh}
+}
+@media (prefers-reduced-motion: reduce){ .btn{transition:none} }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <section class="viewer" aria-label="Model 3D kolektora">
+    <canvas id="c"></canvas>
+    <div class="toolbar">
+      <button class="btn" id="v-iso">Izometria</button>
+      <button class="btn" id="v-front">Na stronę wydechu</button>
+      <button class="btn" id="v-side">Wzdłuż wału</button>
+      <button class="btn" id="v-top">Z góry</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="btn" id="t-turbo" aria-pressed="true">G25</button>
+      <button class="btn" id="t-iwg" aria-pressed="true">IWG</button>
+      <button class="btn" id="t-engine" aria-pressed="true">Silnik</button>
+      <button class="btn" id="t-weld" aria-pressed="true">Spawy</button>
+      <button class="btn" id="t-rot" aria-pressed="false">Obrót</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="btn" id="t-flow" aria-pressed="false">Przepływ ▶</button>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="background:#c9772d"></i>kolektor v14</span>
+      <span><i class="sw" style="background:#1fb4ff"></i>spoina obwodowa</span>
+      <span><i class="sw" style="background:#ff2d78"></i>zbieg / kolec / przegroda</span>
+      <span><i class="sw" style="background:#8b93a0"></i>G25-550 (skan)</span>
+      <span><i class="sw" style="background:#d9542b"></i>IWG (przybliżony)</span>
+      <span><i class="sw" style="background:#c9ccd1"></i>głowica 3S-GE (model)</span>
+    </div>
+    <div class="flowbar" id="flowbar" hidden>
+      <div class="fhead"><span class="crank" id="f-crank"></span><button class="btn" id="f-min" aria-expanded="true" title="Zwiń / rozwiń panel">Ukryj panel</button></div>
+      <div class="fbody">
+      <div class="row"><label for="f-rpm">Obroty</label><select id="f-rpm"><option value="4500">4500 obr/min (1,6 bar abs)</option><option value="7500" selected>7500 obr/min (2,4 bar abs)</option></select></div>
+      <div class="row"><label for="f-speed">Tempo</label><input id="f-speed" type="range" min="1" max="12" value="4"><span id="f-speedv"></span></div>
+      <div class="row"><button class="btn" id="f-pause">Pauza</button></div>
+      <canvas id="hud" width="560" height="240" aria-label="Ciśnienie w portach wydechowych"></canvas>
+      <div style="color:var(--muted)">Cząstki: <b style="color:#ff7a1a">cyl. 1 + 4</b> / <b style="color:#27c3ff">cyl. 2 + 3</b>. Prędkości z symulacji 1D, w zwolnionym tempie. Wykres: ciśnienie w portach [bar abs], linia ciągła = cyl. 1 i 2, przerywana = 4 i 3.</div>
+      </div>
+    </div>
+    <div class="status" id="status">wczytywanie modelu…</div>
+  </section>
+
+  <aside>
+    <div>
+      <h1>Kolektor 3S-GE BEAMS → G25-550 0.72 V-band</h1>
+      <div class="sub">Wariant 14 (pokrywa 165 mm) · top-mount · kołnierz i wyloty OEM BEAMS ucięte 25 mm za kołnierzem · kolana 44,5×2,6 (5d R97,5 i 2d R40) · merge 4w1 · przegroda 1+4 | 2+3 do kołnierza V-band</div>
+    </div>
+
+    <div>
+      <h2>Najważniejsze wymiary</h2>
+      <dl class="kv">
+        <dt>Runnery A = D (cyl. 1, 4)</dt><dd><b>214 mm</b></dd>
+        <dt>Runnery B = C (cyl. 2, 3)</dt><dd><b>126 mm</b></dd>
+        <dt>Zbieg od płaszczyzny głowicy</dt><dd>125 mm</dd>
+        <dt>V-band nad osią portów</dt><dd>49,5 mm</dd>
+        <dt>Oś turbo (wys. / od głowicy)</dt><dd>130 / 187 mm</dd>
+        <dt>Góra turbo nad pokrywą</dt><dd>+49 mm (pokrywa 165)</dd>
+        <dt>Rura / kolana</dt><dd>44,5×2,6 · 2d R40 · 5d R97,5</dd>
+        <dt>Kolana 2d / 5d</dt><dd>5 szt. · 2 szt.</dd>
+        <dt>Przegroda 3 mm</dt><dd>82 × 59 mm</dd>
+      </dl>
+    </div>
+
+    <div>
+      <h2>Cięcia (C, D = lustra B, A)</h2>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Runner</th><th>Kolana i proste</th><th>Dł.</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag">A / D</span></td><td class="n">OEM 35 · 2 · <b>5d 66,0°</b> · 8 · <b>2d 92,9° w górę</b></td><td class="n">214</td></tr>
+          <tr><td><span class="tag">B / C</span></td><td class="n">OEM 35 · 1 · <b>2d 26,9°</b> · 18 · <b>2d 86,9° w górę</b></td><td class="n">126</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="note"><b>Spawy:</b> 14 spoin obwodowych rur (OEM↔kolano, kolano↔kolano, wycinek 2,9° w kolanie 1/4), kolce 1↔4 i 2↔3 (ok. 63 i 72 mm), obwód przegrody obustronnie (535 mm), kolec↔stożek, stożek↔V-band i szew stożka. Razem ok. 3,1 m.</p>
+      <p class="note">Końce kolan w górę są przycięte na kolec (płaszczyzna środkowa) i na płaszczyznę przegrody. Przegroda 3 mm oddziela parę 1+4 od 2+3 aż do kołnierza V-band. Wyloty OEM ucięte 25 mm za kołnierzem (35 mm od głowicy); dalej kolana 44,5 bez redukcji. Stożek Ø89 → Ø65,5, wys. 33 mm.</p>
+    </div>
+
+    <div>
+      <h2>Założenia do potwierdzenia</h2>
+      <ul class="note">
+        <li>Pokrywa zaworów 165 mm nad osią portów (fotogrametria, potwierdzone).</li>
+        <li class="warn">G25 ze skanu: wlot V-band 62 mm w bok od osi, turbo odsunięte od głowicy (oś 187 mm). Siłownik IWG 9,6 mm od płaszczyzny głowicy – do sprawdzenia.</li>
+        <li class="warn">IWG przybliżony (puszka Ø75, cięgno 110 mm) – do podmiany po pomiarach ST60.</li>
+        <li class="warn">Przesunięcie wlotu V-band względem osi ST60: przyjęte 30 mm.</li>
+        <li class="warn">Promień kolan SR u dostawcy: przyjęte R38.</li>
+        <li class="warn">Gwint szpilek w głowicy (otwory 10,5 mm).</li>
+        <li>Głowica z fotogrametrii (65 zdjęć, skala z maty i portów, błąd ~2 mm): deck 52 mm pod osią wydechu, porty ssące 18 mm wyżej, szerokość 201, długość 437, pokrywa do 165 mm.</li>
+        <li class="warn">Listwa pokrywy wystaje 12 mm poza płaszczyznę wydechu (X 65–115) – siłownik IWG tylko 2,5 mm od niej.</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
+
+const canvas = document.getElementById('c');
+const status = document.getElementById('status');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 5000);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x404a55, 1.1));
+const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(400, 600, 500); scene.add(key);
+const rim = new THREE.DirectionalLight(0xffffff, 0.6); rim.position.set(-500, 200, -300); scene.add(rim);
+
+// układ projektu: X = pion, Y = wzdłuż głowicy, Z = od kołnierza na zewnątrz -> obrót, by X był "w górę"
+const world = new THREE.Group(); world.rotation.z = Math.PI / 2; scene.add(world);
+
+const D = { ax_x: 145.5, ax_z: 95.0, x_vb: 64.5, zc: 125.0, H: 180.0 };
+
+// turbo G25-550 ze skanu (złożone) + przybliżony IWG, ustawione na V-band kolektora
+const turbo = new THREE.Group(); const iwgGroup = new THREE.Group();
+const mats = {
+  turbina: new THREE.MeshStandardMaterial({ color: 0x6d7682, metalness: .45, roughness: .55 }),
+  chra: new THREE.MeshStandardMaterial({ color: 0x8b93a0, metalness: .5, roughness: .45 }),
+  sprezarka: new THREE.MeshStandardMaterial({ color: 0xb9c0c9, metalness: .55, roughness: .4 }),
+  iwg: new THREE.MeshStandardMaterial({ color: 0xd9542b, metalness: .2, roughness: .5 })
+};
+fetch('g25_v14.json').then(r => r.json()).then(parts => {
+  for (const [k, { v, f }] of Object.entries(parts)) {
+    let g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3)); g.setIndex(f);
+    g = toCreasedNormals(g, Math.PI / 4);
+    (k === 'iwg' ? iwgGroup : turbo).add(new THREE.Mesh(g, mats[k]));
+  }
+}).catch(() => { status.textContent = 'Nie udało się wczytać modelu G25.'; });
+world.add(turbo); world.add(iwgGroup);
+// linie spawów (spawy_v14.json): obwodowe = niebieskie, zbieg/kolec/przegroda = różowe
+const welds = new THREE.Group(); world.add(welds);
+fetch('spawy_v14.json').then(r => r.json()).then(list => {
+  for (const s of list) {
+    const pts = s.pts.map(p => new THREE.Vector3(p[0], p[1], p[2]));
+    if (pts.length < 2) continue;
+    const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal', 0);
+    const geo = new THREE.TubeGeometry(curve, Math.min(400, pts.length * 3), 1.3, 6, false);
+    const col = s.typ === 'obwodowa' ? 0x1fb4ff : 0xff2d78;
+    const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col }));
+    m.userData.opis = s.opis; welds.add(m);
+  }
+}).catch(() => {});
+
+// silnik: model głowicy 3S-GE (przylgi i porty z uszczelek, bryła ze zdjęć) + pokrywa + blok
+const engine = new THREE.Group();
+const eMats = { glowica: new THREE.MeshStandardMaterial({ color: 0xc9ccd1, metalness: .35, roughness: .55 }),
+  pokrywa: new THREE.MeshStandardMaterial({ color: 0xa9adb3, metalness: .4, roughness: .5 }),
+  blok: new THREE.MeshStandardMaterial({ color: 0x2b2d31, metalness: .2, roughness: .6, transparent: true, opacity: .85 }) };
+fetch('silnik_v1.json').then(r => r.json()).then(parts => {
+  for (const [k, { v, f }] of Object.entries(parts)) {
+    let g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3)); g.setIndex(f);
+    g = toCreasedNormals(g, Math.PI / 5); engine.add(new THREE.Mesh(g, eMats[k]));
+  }
+}).catch(() => {});
+world.add(engine);
+
+// oś portów
+const axis = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -200, 0), new THREE.Vector3(0, 200, 0)]),
+  new THREE.LineDashedMaterial({ color: 0xb8661f, dashSize: 8, gapSize: 6 }));
+axis.computeLineDistances(); world.add(axis);
+
+fetch('kolektor_v14.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(({ v, f }) => {
+  let g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+  g.setIndex(f);
+  g = toCreasedNormals(g, Math.PI / 5);
+  const mat = new THREE.MeshStandardMaterial({ color: 0xc9772d, metalness: .55, roughness: .38 });
+  world.add(new THREE.Mesh(g, mat));
+  status.textContent = `${(f.length / 3).toLocaleString('pl-PL')} trójkątów`;
+}).catch(() => { status.textContent = 'Nie udało się wczytać modelu kolektora. Odśwież stronę.'; });
+
+const target = new THREE.Vector3(0, 30, 90);   // w układzie sceny (po obrocie): x=-Y, y=X, z=Z
+const views = {
+  iso:   new THREE.Vector3(520, 380, 620),
+  front: new THREE.Vector3(0, 60, 900),
+  side:  new THREE.Vector3(900, 60, 90),
+  top:   new THREE.Vector3(0, 950, 91)
+};
+let anim = null;
+function setView(name, instant) {
+  const to = views[name].clone().add(new THREE.Vector3(0, 0, 0));
+  controls.target.copy(target);
+  if (instant || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { camera.position.copy(to); controls.update(); return; }
+  const from = camera.position.clone(); const t0 = performance.now();
+  anim = t => { const k = Math.min(1, (t - t0) / 600); const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    camera.position.lerpVectors(from, to, e); if (k >= 1) anim = null; };
+}
+document.getElementById('v-iso').onclick = () => setView('iso');
+document.getElementById('v-front').onclick = () => setView('front');
+document.getElementById('v-side').onclick = () => setView('side');
+document.getElementById('v-top').onclick = () => setView('top');
+const toggle = (id, obj) => { const b = document.getElementById(id); b.onclick = () => { obj.visible = !obj.visible; b.setAttribute('aria-pressed', obj.visible); }; };
+toggle('t-turbo', turbo); toggle('t-weld', welds); toggle('t-iwg', iwgGroup); toggle('t-engine', engine);
+const rotBtn = document.getElementById('t-rot');
+rotBtn.onclick = () => { controls.autoRotate = !controls.autoRotate; rotBtn.setAttribute('aria-pressed', controls.autoRotate); };
+controls.autoRotateSpeed = 1.2;
+
+// ================= ANIMACJA PRZEPŁYWU (symulacja 1D) =================
+const flow = { on: false, data: null, rpm: '7500', phi: 0, paused: false, parts: [], group: new THREE.Group() };
+world.add(flow.group);
+const MAXP = 4000;
+const pGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(MAXP * 3), pCol = new Float32Array(MAXP * 3);
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
+pGeo.setDrawRange(0, 0);
+const pMat = new THREE.PointsMaterial({ size: 6.5, vertexColors: true, transparent: true, opacity: .95, depthWrite: false, blending: THREE.AdditiveBlending });
+flow.group.add(new THREE.Points(pGeo, pMat));
+flow.group.visible = false;
+const COL = { A: [1.0, .48, .1], D: [1.0, .48, .1], B: [.15, .76, 1.0], C: [.15, .76, 1.0] };
+const CYL = { A: 1, B: 2, C: 3, D: 4 };
+fetch('przeplyw_v14.json').then(r => r.json()).then(d => {
+  for (const n of 'ABCD') {
+    const P = d.paths[n]; P.v = [];
+    for (let i = 0; i < P.p.length; i += 3) P.v.push(new THREE.Vector3(P.p[i], P.p[i + 1], P.p[i + 2]));
+  }
+  flow.data = d;
+}).catch(() => { document.getElementById('f-crank').textContent = 'Nie udało się wczytać danych przepływu.'; });
+
+function posAt(P, s) {
+  const S = P.s;
+  if (s <= 0) return P.v[0];
+  if (s >= S[S.length - 1]) return null;
+  let lo = 0, hi = S.length - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (S[m] <= s) lo = m; else hi = m; }
+  return P.v[lo].clone().lerp(P.v[hi], (s - S[lo]) / (S[hi] - S[lo]));
+}
+function simAt(key, phi) {
+  const D = flow.data.sim[flow.rpm];
+  const i = Math.floor((((phi % 720) + 720) % 720) / 2) % D.deg.length;
+  return D[key][i];
+}
+function uAlong(n, frac, phi) {           // prędkość [m/s] w runnerze w miejscu frac (0..1)
+  const arr = simAt('u' + n, phi); const x = Math.max(0, Math.min(1, frac)) * (arr.length - 1);
+  const i = Math.min(arr.length - 2, Math.floor(x)); return arr[i] + (arr[i + 1] - arr[i]) * (x - i);
+}
+function stepFlow(dtReal) {
+  if (!flow.data) return;
+  const rpm = +flow.rpm;
+  const cycleSec = 26 / (+document.getElementById('f-speed').value);      // sekund na cykl 720°
+  const dphi = flow.paused ? 0 : 720 * dtReal / cycleSec;
+  const dtSim = dphi / (rpm * 6);
+  flow.phi = (flow.phi + dphi) % 720;
+  for (const n of 'ABCD') {                                                  // emisja przy porcie
+    const u0 = uAlong(n, 0, flow.phi); if (u0 <= 0) continue;
+    const L = u0 * 1000 * dtSim; let k = L * 0.22;
+    while (k > 0 && flow.parts.length < MAXP) {
+      if (k < 1 && Math.random() > k) break;
+      flow.parts.push({ n, s: Math.random() * L, j: [(Math.random() - .5) * 26, (Math.random() - .5) * 26] }); k -= 1;
+    }
+  }
+  const P = flow.data.paths, uvb = simAt('uvb', flow.phi);
+  flow.parts = flow.parts.filter(p => {
+    const path = P[p.n], Lr = path.Lrun;
+    const u = p.s < Lr ? uAlong(p.n, p.s / Lr, flow.phi) : Math.max(25, uvb);
+    p.s += u * 1000 * dtSim;
+    return p.s > -5 && p.s < path.s[path.s.length - 1];
+  });
+  const cnt = Math.min(flow.parts.length, MAXP);
+  for (let i = 0; i < cnt; i++) {
+    const p = flow.parts[i], v = posAt(P[p.n], p.s); if (!v) continue;
+    const spread = p.s < P[p.n].Lrun ? 0.55 : 0.35;
+    pPos[3 * i] = v.x + p.j[0] * spread * 0.4; pPos[3 * i + 1] = v.y + p.j[1] * spread; pPos[3 * i + 2] = v.z + p.j[0] * spread;
+    const c = COL[p.n], f = p.s < P[p.n].Lrun ? 1 : 0.8;
+    pCol[3 * i] = c[0] * f; pCol[3 * i + 1] = c[1] * f; pCol[3 * i + 2] = c[2] * f;
+  }
+  pGeo.setDrawRange(0, cnt); pGeo.attributes.position.needsUpdate = true; pGeo.attributes.color.needsUpdate = true;
+  drawHud();
+}
+function drawHud() {
+  const cv = document.getElementById('hud'), g = cv.getContext('2d'), W = cv.width, H = cv.height, D = flow.data.sim[flow.rpm];
+  const st = getComputedStyle(document.documentElement);
+  g.clearRect(0, 0, W, H);
+  let pmax = 0; for (const n of 'ABCD') for (const a of D['p' + n]) pmax = Math.max(pmax, a[0]);
+  pmax = Math.ceil(pmax + .2);
+  const px = x => 30 + (W - 36) * x / 720, py = p => H - 22 - (H - 36) * p / pmax;
+  g.strokeStyle = st.getPropertyValue('--line'); g.fillStyle = st.getPropertyValue('--muted'); g.font = '18px sans-serif'; g.lineWidth = 1;
+  for (let p = 0; p <= pmax; p++) { g.beginPath(); g.moveTo(30, py(p)); g.lineTo(W - 6, py(p)); g.stroke(); g.fillText(p, 6, py(p) + 6); }
+  for (const n of 'ABCD') {
+    const c = COL[n];
+    g.strokeStyle = `rgb(${c[0] * 255 | 0},${c[1] * 255 | 0},${c[2] * 255 | 0})`;
+    g.lineWidth = (n === 'A' || n === 'B') ? 2.5 : 1.4; g.setLineDash(n === 'D' || n === 'C' ? [6, 5] : []);
+    g.beginPath(); D['p' + n].forEach((a, i) => { const x = px(D.deg[i]), y = py(a[0]); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke();
+  }
+  g.setLineDash([]); g.strokeStyle = st.getPropertyValue('--ink'); g.lineWidth = 2;
+  g.beginPath(); g.moveTo(px(flow.phi), 8); g.lineTo(px(flow.phi), H - 20); g.stroke();
+  const open = [];
+  for (const n of 'ABCD') { const x = ((flow.phi - D.firing[CYL[n]] - D.evo) % 720 + 720) % 720; if (x < D.ex_dur) open.push(CYL[n]); }
+  document.getElementById('f-crank').textContent = `wał ${flow.phi.toFixed(0)}° · wydech: cyl. ${open.sort().join(', ') || '–'}`;
+}
+let lastT = null;
+function flowTick(t) {
+  if (flow.on) { const dt = lastT == null ? 0 : Math.min(0.05, (t - lastT) / 1000); stepFlow(dt); }
+  lastT = t;
+}
+const fbtn = document.getElementById('t-flow'), fbar = document.getElementById('flowbar');
+fbtn.onclick = () => {
+  flow.on = !flow.on; fbtn.setAttribute('aria-pressed', flow.on); fbar.hidden = !flow.on; flow.group.visible = flow.on;
+  world.traverse(o => {
+    if (o.isMesh && o.material && o.material.color && o.material.color.getHex() === 0xc9772d) {
+      o.material.transparent = flow.on; o.material.opacity = flow.on ? .22 : 1; o.material.depthWrite = !flow.on; o.material.needsUpdate = true;
+    }
+  });
+  for (const grp of [turbo, iwgGroup, engine]) grp.traverse(o => {
+    if (o.isMesh) { o.material.userData.op ??= o.material.opacity; o.material.transparent = flow.on || o.material.userData.op < 1;
+      o.material.opacity = flow.on ? .18 : o.material.userData.op; o.material.depthWrite = !flow.on; o.material.needsUpdate = true; }
+  });
+  if (!flow.on) { flow.parts = []; pGeo.setDrawRange(0, 0); }
+};
+document.getElementById('f-rpm').onchange = e => { flow.rpm = e.target.value; flow.parts = []; };
+document.getElementById('f-pause').onclick = e => { flow.paused = !flow.paused; e.target.textContent = flow.paused ? 'Dalej' : 'Pauza'; };
+const spd = document.getElementById('f-speed'), spdv = document.getElementById('f-speedv');
+const updSpd = () => { spdv.textContent = `1 cykl = ${(26 / +spd.value).toFixed(1)} s`; };
+spd.oninput = updSpd; updSpd();
+const fmin = document.getElementById('f-min');
+fmin.onclick = () => { const m = fbar.classList.toggle('min'); fmin.textContent = m ? 'Pokaż panel' : 'Ukryj panel'; fmin.setAttribute('aria-expanded', !m);
+  try { localStorage.setItem('flowMin', m ? '1' : '0'); } catch (e) {} };
+try { if (localStorage.getItem('flowMin') === '1') { fbar.classList.add('min'); fmin.textContent = 'Pokaż panel'; fmin.setAttribute('aria-expanded', false); } } catch (e) {}
+
+
+function resize() { const r = canvas.parentElement.getBoundingClientRect(); renderer.setSize(r.width, r.height, false);
+  camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(canvas.parentElement); resize();
+camera.position.copy(views.iso); controls.target.copy(target); controls.update();
+renderer.setAnimationLoop(t => { flowTick(t); if (anim) anim(t); controls.update(); renderer.render(scene, camera); });
+</script>
+
+</body>
+</html>
