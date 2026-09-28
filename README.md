@@ -12,7 +12,6 @@ Interaktywny podgląd 3D spawanego kolektora wydechowego top-mount dla Toyoty 3S
 - linie spawów (16 spoin, ok. 2,2 m),
 - [szablony do druku 1:1 (PDF)](szablony_v15.pdf) – paski owijane na kolanach z liniami cięcia i kolcami merge, przegroda,
 - [model STEP kolektora](kolektor_g25_v15.step),
-- dolot: kolektor ssący BMW B48 na adapterze z kanałami skręconymi o 45° w dół (powietrze wchodzi do portów od góry) – adapter dwuczęściowy do druku 3D: [część A](adapter_b48_czesc_A.stl), [część B](adapter_b48_czesc_B.stl) (STEP: [A](adapter_b48_czesc_A.step), [B](adapter_b48_czesc_B.step)), [tulejki](tulejki_adapter_b48.step),
 - animację przepływu spalin z symulacji 1D (4500 i 7500 obr/min, kolejność zapłonu 1-3-4-2) z wykresem ciśnienia w portach.
 
 ## Obsługa
