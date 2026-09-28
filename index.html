@@ -97,7 +97,8 @@ td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:now
     </div>
     <div class="legend">
       <span><i class="sw" style="background:#c9772d"></i>kolektor v15</span>
-      <span><i class="sw" style="background:#28aa78"></i>adapter B48 (druk 3D)</span>
+      <span><i class="sw" style="background:#1f8f64"></i>adapter B48 – część A</span>
+      <span><i class="sw" style="background:#3cc58c"></i>część B</span>
       <span><i class="sw" style="background:#d0d4da"></i>tulejki stalowe</span>
       <span><i class="sw" style="background:#505a6e"></i>kolektor ssący B48</span>
       <span><i class="sw" style="background:#1fb4ff"></i>spoina obwodowa</span>
@@ -142,7 +143,7 @@ td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:now
 
     <div>
       <h2>Cięcia (C, D = lustra B, A)</h2>
-      <p class="note"><a href="szablony_v15.pdf" target="_blank" rel="noopener">Szablony do druku 1:1 (PDF)</a> · <a href="kolektor_g25_v15.step">model STEP</a> · <a href="adapter_b48_druk3d.stl">adapter B48 do druku (STL)</a> · <a href="adapter_b48_druk3d.step">STEP</a> · <a href="tulejki_adapter_b48.step">tulejki (STEP)</a></p>
+      <p class="note"><a href="szablony_v15.pdf" target="_blank" rel="noopener">Szablony do druku 1:1 (PDF)</a> · <a href="kolektor_g25_v15.step">model STEP</a> · <a href="adapter_b48_czesc_A.stl">adapter A (STL)</a> · <a href="adapter_b48_czesc_B.stl">adapter B (STL)</a> · <a href="adapter_b48_czesc_A.step">A STEP</a> · <a href="adapter_b48_czesc_B.step">B STEP</a> · <a href="tulejki_adapter_b48.step">tulejki (STEP)</a></p>
       <div style="overflow-x:auto">
       <table>
         <thead><tr><th>Runner</th><th>Kolana i proste</th><th>Dł.</th></tr></thead>
@@ -158,12 +159,13 @@ td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:now
 
     <div>
       <h2>Dolot: kolektor B48 + adapter</h2>
-      <p class="note">Adapter do druku 3D (PA12-CF / PA-CF, ok. 430 g): 4 kanały owal B48 48,8×31,2 → port 3S 55×46 skręcone o 45° w dół (powietrze wchodzi do portów od góry), ciasny łuk R32. <b>Grubość po osi kanału 41,7 mm</b> (kołnierz B48 pochylony – jego krawędź wystaje do 65 mm). 12 tulejek stalowych: 5× Ø12/8,5×12 pod śruby głowicy, 7× Ø11 z gwintem M7 pod kolektor B48 (pozycje do potwierdzenia na kolektorze). Otwory Ø24 w płycie B48 dają dojście klucza do śrub głowicy – dokręcić przed założeniem kolektora.</p>
+      <p class="note">Adapter do druku 3D (PA12-CF / PA6-CF), <b>dwuczęściowy</b>: A – płyta 12 mm przykręcana do głowicy 5 śrubami (pełny dostęp kluczem), B – kanały owal B48 → port 3S skręcone o 45° w dół (powietrze od góry) z kołnierzem 8 mm, łączona z A 6 śrubami M6 (tulejki gwintowane w A) i o-ringami w rowkach wokół portów. <b>Grubość po osi kanału 49,7 mm.</b> Kolektor B48 obrócony – przepustnica z przodu, plenum nad pokrywą (góra 289 mm). Tulejki stalowe: 5× pod śruby głowicy, 6× M7 pod kolektor B48 (pozycje do potwierdzenia), 6× M6 A–B.</p>
     </div>
     <div>
       <h2>Założenia do potwierdzenia</h2>
       <ul class="note">
         <li>Pokrywa zaworów 165 mm nad osią portów (fotogrametria, potwierdzone).</li>
+        <li>Obudowa sprężarki G25 obrócona – wylot skierowany w dół.</li>
         <li class="warn">G25 ze skanu: wlot V-band 62 mm w bok od osi, turbo odsunięte od głowicy (oś 187 mm). Siłownik IWG 9,6 mm od płaszczyzny głowicy – do sprawdzenia.</li>
         <li class="warn">IWG przybliżony (puszka Ø75, cięgno 110 mm) – do podmiany po pomiarach ST60.</li>
         <li class="warn">Przesunięcie wlotu V-band względem osi ST60: przyjęte 30 mm.</li>
@@ -224,7 +226,7 @@ world.add(turbo); world.add(iwgGroup);
 // dolot: kolektor ssący B48 + adapter 45° na głowicę 3S-GE
 const b48g = new THREE.Group(); world.add(b48g);
 fetch('dolot_b48.json').then(r => r.json()).then(parts => {
-  const mats = { adapter: new THREE.MeshStandardMaterial({ color: 0x28aa78, metalness: .1, roughness: .7 }), tulejki: new THREE.MeshStandardMaterial({ color: 0xd0d4da, metalness: .9, roughness: .25 }), b48: new THREE.MeshStandardMaterial({ color: 0x505a6e, metalness: .2, roughness: .6 }) };
+  const mats = { adapterA: new THREE.MeshStandardMaterial({ color: 0x1f8f64, metalness: .1, roughness: .7 }), adapterB: new THREE.MeshStandardMaterial({ color: 0x3cc58c, metalness: .1, roughness: .7 }), tulejki: new THREE.MeshStandardMaterial({ color: 0xd0d4da, metalness: .9, roughness: .25 }), b48: new THREE.MeshStandardMaterial({ color: 0x505a6e, metalness: .2, roughness: .6 }) };
   for (const [k, { v, f }] of Object.entries(parts)) { let g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3)); g.setIndex(f); g = toCreasedNormals(g, Math.PI / 4); b48g.add(new THREE.Mesh(g, mats[k])); }
 }).catch(() => {});
 // linie spawów (spawy_v14.json): obwodowe = niebieskie, zbieg/kolec/przegroda = różowe
