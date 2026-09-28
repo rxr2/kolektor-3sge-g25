@@ -82,6 +82,7 @@ td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:now
     <div class="toolbar">
       <button class="btn" id="v-iso">Izometria</button>
       <button class="btn" id="v-front">Na stronę wydechu</button>
+      <button class="btn" id="v-intake">Na stronę dolotu</button>
       <button class="btn" id="v-side">Wzdłuż wału</button>
       <button class="btn" id="v-top">Z góry</button>
       <span class="sep" aria-hidden="true"></span>
@@ -267,12 +268,13 @@ fetch('kolektor_v15.json').then(r => { if (!r.ok) throw new Error(r.status); ret
   status.textContent = `${(f.length / 3).toLocaleString('pl-PL')} trójkątów`;
 }).catch(() => { status.textContent = 'Nie udało się wczytać modelu kolektora. Odśwież stronę.'; });
 
-const target = new THREE.Vector3(0, 30, 90);   // w układzie sceny (po obrocie): x=-Y, y=X, z=Z
+const target = new THREE.Vector3(0, 40, -60);   // środek całego silnika (wydech + dolot)
 const views = {
-  iso:   new THREE.Vector3(520, 380, 620),
-  front: new THREE.Vector3(0, 60, 900),
-  side:  new THREE.Vector3(900, 60, 90),
-  top:   new THREE.Vector3(0, 950, 91)
+  iso:    new THREE.Vector3(650, 480, 700),
+  front:  new THREE.Vector3(0, 60, 1000),
+  intake: new THREE.Vector3(0, 90, -1100),
+  side:   new THREE.Vector3(1150, 60, -60),
+  top:    new THREE.Vector3(0, 1250, -59)
 };
 let anim = null;
 function setView(name, instant) {
@@ -286,6 +288,7 @@ function setView(name, instant) {
 document.getElementById('v-iso').onclick = () => setView('iso');
 document.getElementById('v-front').onclick = () => setView('front');
 document.getElementById('v-side').onclick = () => setView('side');
+document.getElementById('v-intake').onclick = () => setView('intake');
 document.getElementById('v-top').onclick = () => setView('top');
 const toggle = (id, obj) => { const b = document.getElementById(id); b.onclick = () => { obj.visible = !obj.visible; b.setAttribute('aria-pressed', obj.visible); }; };
 toggle('t-turbo', turbo); toggle('t-b48', b48g); toggle('t-weld', welds); toggle('t-iwg', iwgGroup); toggle('t-engine', engine);
