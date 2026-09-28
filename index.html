@@ -88,6 +88,7 @@ td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:now
       <button class="btn" id="t-turbo" aria-pressed="true">G25</button>
       <button class="btn" id="t-iwg" aria-pressed="true">IWG</button>
       <button class="btn" id="t-engine" aria-pressed="true">Silnik</button>
+      <button class="btn" id="t-b48" aria-pressed="true">Dolot B48</button>
       <button class="btn" id="t-weld" aria-pressed="true">Spawy</button>
       <button class="btn" id="t-rot" aria-pressed="false">Obrót</button>
       <span class="sep" aria-hidden="true"></span>
@@ -95,6 +96,8 @@ td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:now
     </div>
     <div class="legend">
       <span><i class="sw" style="background:#c9772d"></i>kolektor v15</span>
+      <span><i class="sw" style="background:#28aa78"></i>adapter B48</span>
+      <span><i class="sw" style="background:#505a6e"></i>kolektor ssący B48</span>
       <span><i class="sw" style="background:#1fb4ff"></i>spoina obwodowa</span>
       <span><i class="sw" style="background:#ff2d78"></i>zbieg / kolec / przegroda</span>
       <span><i class="sw" style="background:#8b93a0"></i>G25-550 (skan)</span>
@@ -137,7 +140,7 @@ td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:now
 
     <div>
       <h2>Cięcia (C, D = lustra B, A)</h2>
-      <p class="note"><a href="szablony_v15.pdf" target="_blank" rel="noopener">Szablony do druku 1:1 (PDF)</a> · <a href="kolektor_g25_v15.step">model STEP</a></p>
+      <p class="note"><a href="szablony_v15.pdf" target="_blank" rel="noopener">Szablony do druku 1:1 (PDF)</a> · <a href="kolektor_g25_v15.step">model STEP</a> · <a href="adapter_b48_3sge.step">adapter B48 (STEP)</a></p>
       <div style="overflow-x:auto">
       <table>
         <thead><tr><th>Runner</th><th>Kolana i proste</th><th>Dł.</th></tr></thead>
@@ -151,6 +154,10 @@ td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:now
       <p class="note">Końce kolan w górę są przycięte na kolec (płaszczyzna środkowa) i na płaszczyznę przegrody. Przegroda 3 mm oddziela parę 1+4 od 2+3 aż do kołnierza V-band. Wyloty OEM ucięte 25 mm za kołnierzem (35 mm od głowicy); dalej kolana 44,5 bez redukcji. Stożek Ø89 → Ø65,5, wys. 33 mm.</p>
     </div>
 
+    <div>
+      <h2>Dolot: kolektor B48 + adapter</h2>
+      <p class="note">Adapter z 4 kanałami: owal B48 48,8×31,2 → port 3S 55×46, łuk 45° w dół (powietrze wchodzi do portów od góry), płyty 12 mm po obu stronach. Rozstaw portów B48 91 mm dopasowany do 3S (92,75/95,1/92,75). Kolektor B48 ustawiony plenum na zewnątrz – najwyżej 43 mm nad pokrywą; luz do silnika ≥ 52 mm.</p>
+    </div>
     <div>
       <h2>Założenia do potwierdzenia</h2>
       <ul class="note">
@@ -212,6 +219,12 @@ fetch('g25_v15.json').then(r => r.json()).then(parts => {
   }
 }).catch(() => { status.textContent = 'Nie udało się wczytać modelu G25.'; });
 world.add(turbo); world.add(iwgGroup);
+// dolot: kolektor ssący B48 + adapter 45° na głowicę 3S-GE
+const b48g = new THREE.Group(); world.add(b48g);
+fetch('dolot_b48.json').then(r => r.json()).then(parts => {
+  const mats = { adapter: new THREE.MeshStandardMaterial({ color: 0x28aa78, metalness: .3, roughness: .5 }), b48: new THREE.MeshStandardMaterial({ color: 0x505a6e, metalness: .2, roughness: .6 }) };
+  for (const [k, { v, f }] of Object.entries(parts)) { let g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3)); g.setIndex(f); g = toCreasedNormals(g, Math.PI / 4); b48g.add(new THREE.Mesh(g, mats[k])); }
+}).catch(() => {});
 // linie spawów (spawy_v14.json): obwodowe = niebieskie, zbieg/kolec/przegroda = różowe
 const welds = new THREE.Group(); world.add(welds);
 fetch('spawy_v15.json').then(r => r.json()).then(list => {
@@ -275,7 +288,7 @@ document.getElementById('v-front').onclick = () => setView('front');
 document.getElementById('v-side').onclick = () => setView('side');
 document.getElementById('v-top').onclick = () => setView('top');
 const toggle = (id, obj) => { const b = document.getElementById(id); b.onclick = () => { obj.visible = !obj.visible; b.setAttribute('aria-pressed', obj.visible); }; };
-toggle('t-turbo', turbo); toggle('t-weld', welds); toggle('t-iwg', iwgGroup); toggle('t-engine', engine);
+toggle('t-turbo', turbo); toggle('t-b48', b48g); toggle('t-weld', welds); toggle('t-iwg', iwgGroup); toggle('t-engine', engine);
 const rotBtn = document.getElementById('t-rot');
 rotBtn.onclick = () => { controls.autoRotate = !controls.autoRotate; rotBtn.setAttribute('aria-pressed', controls.autoRotate); };
 controls.autoRotateSpeed = 1.2;
